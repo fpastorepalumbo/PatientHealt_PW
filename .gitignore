@@ -40,4 +40,4 @@ build/
 .DS_Store
 
 ### resources ###
-src/main/java/unisa/diem/resources/
+src/main/java/unisa/diem/resources
