@@ -13,68 +13,64 @@ public class FhirService {
     }
 
     /**
-     * Resolves a FHIR resource by reading l'id del CSV,    the resource specified by the provided type and id
+     * Returns a new resource from the ID written in the CSV file
      */
     public Resource getResource(Class<? extends Resource> type, String id) {
         return FhirSingleton.getClient().read().resource(type).withId(id).execute();
     }
 
     /**
-     * Get the Claim related to the given Encounter(interazione tra paziene e medico).
-     *  realz 1 a 1
+     * Returns the Claim related to the Encounter
      */
-    public Claim getClaim(Encounter res) {
+    public Claim getClaim(Encounter enc) {
         return getClient().search().forResource(Claim.class)
-            .where(Claim.ENCOUNTER.hasId("Encounter/" + res.getIdElement().getIdPart()))
-            .returnBundle(Bundle.class)
-            .execute().getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .map(Claim.class::cast)
-            .findFirst().orElse(null);
+                .where(Claim.ENCOUNTER.hasId("Encounter/" + enc.getIdElement().getIdPart()))
+                .returnBundle(Bundle.class)
+                .execute().getEntry().stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(Claim.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
-     * Get the Claim related to the given MedicationRequest (prescrizione medicinale)
+     * Returns the Claim related to the MedicationRequest
      */
-    public Claim getClaim(MedicationRequest res) {
+    public Claim getClaim(MedicationRequest medReq) {
         return getClient().search().forResource(Claim.class)
-            .where(Claim.ENCOUNTER.hasId(res.getEncounter().getReference()))
-            .returnBundle(Bundle.class)
-            .execute().getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .map(Claim.class::cast)
-            .toList().get(1);
+                .where(Claim.ENCOUNTER.hasId(medReq.getEncounter().getReference()))
+                .returnBundle(Bundle.class)
+                .execute().getEntry().stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(Claim.class::cast)
+                .toList().get(1);
     }
 
     /**
-     * Get the ExplanationOfBenefit(copertura assicurativa) related to the given Encounter.
-     *
-     * @param res Encounter resource
-     * @return ExplanationOfBenefit resource
+     * Get the ExplanationOfBenefit related to the given Encounter
      */
-    public ExplanationOfBenefit getEOB(Encounter res) {
+    public ExplanationOfBenefit getEOB(Encounter enc) {
         return getClient().search().forResource(ExplanationOfBenefit.class)
-            .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
-            .returnBundle(Bundle.class)
-            .execute().getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .map(ExplanationOfBenefit.class::cast)
-            .findFirst().orElse(null);
+                .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(enc).getIdElement().getIdPart()))
+                .returnBundle(Bundle.class)
+                .execute().getEntry().stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(ExplanationOfBenefit.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
-     * Get the ExplanationOfBenefit related to the given MedicationRequest.
-     *
-     * @param res MedicationRequest resource
-     * @return ExplanationOfBenefit resource
+     * Get the ExplanationOfBenefit related to the MedicationRequest.
      */
-    public ExplanationOfBenefit getEOB(MedicationRequest res) {
+    public ExplanationOfBenefit getEOB(MedicationRequest medReq) {
         return getClient().search().forResource(ExplanationOfBenefit.class)
-            .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
-            .returnBundle(Bundle.class)
-            .execute().getEntry().stream()
-            .map(Bundle.BundleEntryComponent::getResource)
-            .map(ExplanationOfBenefit.class::cast)
-            .findFirst().orElse(null);
+                .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(medReq).getIdElement().getIdPart()))
+                .returnBundle(Bundle.class)
+                .execute().getEntry().stream()
+                .map(Bundle.BundleEntryComponent::getResource)
+                .map(ExplanationOfBenefit.class::cast)
+                .findFirst()
+                .orElse(null);
     }
 }

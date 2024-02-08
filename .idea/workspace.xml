@@ -5,30 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e94e36ce-43ff-441d-b5bd-3cb97e33da24" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/dicom/DicomHandle.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/dicom/DicomHandle.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/dicom/DicomService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/dicom/DicomService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirWrapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirSingleton.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/AllergiesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/AllergiesParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/BaseLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/BaseParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/CarePlansLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/CarePlansParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ConditionsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ConditionsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/DatasetLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/DatasetService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetUtility.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/DevicesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DevicesParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/EncountersLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/EncountersParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ImagingStudiesLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ImmunizationsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImmunizationsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/Loader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/Parser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/MedicationRequestsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/MedicationRequestsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ObservationsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ObservationsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/OrganizationsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/OrganizationsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/PatientsLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PatientsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/PayersLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PayersParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ProceduresLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ProceduresParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/loader/ProvidersLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PractitionerParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirSingleton.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/fhir/FhirSingleton.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,29 +43,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Application.Main.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/alessandropoli/Documents/DHSA/Project Work/GitHub/PatientHealt_PW/src/main/java/unisa/diem",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "configurable.group.editor",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/alessandropoli/Documents/DHSA/Project Work/GitHub/PatientHealt_PW/src/main/java/unisa/diem&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.editor&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java/unisa/diem" />

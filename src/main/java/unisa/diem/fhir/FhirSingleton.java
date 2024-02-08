@@ -8,7 +8,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
  */
 public class FhirSingleton {
 
-    private static final String baseUrl = "http://localhost:8080/fhir"; // ip docker server
+    private static final String serverUrl = "http://localhost:8080/fhir"; // ip docker server
     private static FhirSingleton instance; // Fhir instance
     private final FhirContext context; // FHIR resource
 
@@ -23,9 +23,8 @@ public class FhirSingleton {
      * Returns the global instance of the FHIR context, creating it if it doesn't exist
      */
     public static FhirContext getContext() {
-        if (instance == null) {
+        if (instance == null)
             instance = new FhirSingleton();
-        }
         return instance.context;
     }
 
@@ -34,7 +33,6 @@ public class FhirSingleton {
      */
     public static IGenericClient getClient() {
         getContext().getRestfulClientFactory().setSocketTimeout(60 * 1000);
-        return getContext().newRestfulGenericClient(baseUrl);
+        return getContext().newRestfulGenericClient(serverUrl);
     }
-
 }

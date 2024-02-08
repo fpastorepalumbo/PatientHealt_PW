@@ -74,10 +74,10 @@ public class ImagingStudiesParser extends BaseParser {
 
             ImagingStudy.ImagingStudySeriesComponent series = is.addSeries();
             if (dicom.hasAttr(TagFromName.SeriesDate))
-                series.setStarted(datasetUtility.parseDate(dicom.getString(TagFromName.SeriesDate)));
-            series.setUid(dicom.getString(TagFromName.SeriesInstanceUID));
-            series.setNumber(dicom.getInt(TagFromName.SeriesNumber));
-            series.setDescription(dicom.getString(TagFromName.SeriesDescription));
+                series.setStarted(datasetUtility.parseDate(dicom.getFirstStringValue(TagFromName.SeriesDate)));
+            series.setUid(dicom.getFirstStringValue(TagFromName.SeriesInstanceUID));
+            series.setNumber(dicom.getFirstIntValue(TagFromName.SeriesNumber));
+            series.setDescription(dicom.getFirstStringValue(TagFromName.SeriesDescription));
             series.setBodySite(new Coding()
                 .setSystem("http://snomed.info/sct")
                 .setCode(rec.get("BODYSITE_CODE"))
@@ -85,11 +85,11 @@ public class ImagingStudiesParser extends BaseParser {
             );
             series.setLaterality(new Coding()
                     .setSystem("http://snomed.info/sct")
-                    .setCode(dicom.getString(TagFromName.Laterality))
+                    .setCode(dicom.getFirstStringValue(TagFromName.Laterality))
                 )
                 .setNumberOfInstances(
                     dicom.hasAttr(TagFromName.NumberOfSeriesRelatedInstances) ?
-                        dicom.getInt(TagFromName.NumberOfSeriesRelatedInstances) : 1
+                        dicom.getFirstIntValue(TagFromName.NumberOfSeriesRelatedInstances) : 1
                 )
                 .setModality(new Coding()
                     .setSystem("http://dicom.nema.org/resources/ontology/DCM")
@@ -102,8 +102,8 @@ public class ImagingStudiesParser extends BaseParser {
                     .setDisplay(rec.get("BODYSITE_DESCRIPTION"))
                 )
                 .addInstance()
-                .setUid(dicom.getString(TagFromName.SOPInstanceUID))
-                .setNumber(dicom.getInt(TagFromName.InstanceNumber))
+                .setUid(dicom.getFirstStringValue(TagFromName.SOPInstanceUID))
+                .setNumber(dicom.getFirstIntValue(TagFromName.InstanceNumber))
                 .setSopClass(new Coding()
                     .setSystem("http://dicom.nema.org/resources/ontology/DCM")
                     .setCode(rec.get("SOP_CODE"))
