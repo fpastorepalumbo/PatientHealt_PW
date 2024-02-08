@@ -11,33 +11,29 @@ import java.util.List;
 
 public class CarePlansParser extends BaseParser {
 
+    /**
+     * Parsing of care-plans (therapy programs) data one at a time
+     */
     CarePlansParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "careplans");
     }
-// carica i careplans. tutte le possibile terapie generali, serie di cure
     @Override
     @SneakyThrows
     public void parseData() {
         int count = 0;
         List<CarePlan> buffer = new ArrayList<>();
-
         for (CSVRecord rec : records) {
-
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
-
             CarePlan cp = new CarePlan();
             cp.setId(rec.get("Id"));
-
             Period period = new Period();
             period.setStart(datasetUtility.parseDate(rec.get("START")));
             if (datasetUtility.hasProp(rec, "STOP"))
                 period.setEnd(datasetUtility.parseDate(rec.get("STOP")));
             cp.setPeriod(period);
-
             cp.setSubject(pat);
             cp.setEncounter(enc);
-
             cp.addCategory(new CodeableConcept()
                 .addCoding(new Coding()
                     .setSystem("http://snomed.info/sct")
@@ -45,7 +41,6 @@ public class CarePlansParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-
             cp.addActivity()
                 .getDetail()
                 .addReasonCode(new CodeableConcept()
@@ -55,7 +50,6 @@ public class CarePlansParser extends BaseParser {
                         .setDisplay(rec.get("REASONDESCRIPTION"))
                     )
                 );
-
             cp.addIdentifier()
                 .setType(new CodeableConcept()
                     .addCoding(new Coding()
@@ -66,22 +60,17 @@ public class CarePlansParser extends BaseParser {
                 )
                 .setValue(rec.get("Id"))
                 .setSystem("urn:ietf:rfc:3986");
-
             count++;
             buffer.add(cp);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d careplans", count);
-
+                    datasetUtility.logInfo("%d careplans parsed", count);
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL careplans");
+        datasetUtility.logInfo("Careplans parsed");
     }
 }

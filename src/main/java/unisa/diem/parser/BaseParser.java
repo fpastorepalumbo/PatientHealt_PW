@@ -9,27 +9,24 @@ import java.util.List;
  */
 public abstract class BaseParser implements Parser {
 
-    protected final String subject; //nome del csv senza est.
-    protected final DatasetUtility datasetUtility; //coll al datasetservice
-    protected List<CSVRecord> records; //lista di record csv
+    protected final String subject; // CSV file name, without extension
+    protected final DatasetUtility datasetUtility; // link at the dataset utility
+    protected List<CSVRecord> records; // list of records from the CSV file
 
     /**
-     * Initializes the loader by parsing the assigned CSV file and storing its records
-     * impl comp astratto del singolo loader,
-     * composite
-     * @param datasetUtility service for parsing csv files
-     * @param subject        name of the csv file to load without the .csv extension
+     * Initializes the parser by parsing the assigned CSV file and storing its records
+     * Composite abstract class
      */
     protected BaseParser(DatasetUtility datasetUtility, String subject) {
         this.subject = subject;
         this.datasetUtility = datasetUtility;
         this.records = datasetUtility.parse(subject);
         if (records == null)
-            throw new RuntimeException("Failed to load " + subject);
+            throw new RuntimeException("Parsing failure for: " + subject);
     }
 
     /**
-     * Creates and stores the FHIR resources from the parsed CSV records
+     * Abstract method to parse the data
      */
     @Override
     public abstract void parseData();

@@ -10,8 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Parsing of devices (prescriptions of medical devices) data one at a time
+ */
 public class DevicesParser extends BaseParser {
-//prescrizioni di tutti i dispositivi medici (gli ordini)
+
     public DevicesParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "devices");
     }
@@ -33,17 +36,13 @@ public class DevicesParser extends BaseParser {
         int count = 0;
         List<Device> devBuffer = new ArrayList<>();
         List<DeviceRequest> reqBuffer = new ArrayList<>();
-
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
-
             Device dev = new Device();
             dev.setId("DEV-" + (count + 1));
             DeviceRequest dr = new DeviceRequest();
-
             dev.setPatient(pat);
-
             Map<String, String> udiParts = splitUDI(rec.get("UDI"));
             dev.addUdiCarrier()
                 .setDeviceIdentifier(udiParts.get("01"))
@@ -51,7 +50,6 @@ public class DevicesParser extends BaseParser {
                 .setJurisdiction(udiParts.get("17"))
                 .setCarrierAIDC(udiParts.get("10").getBytes())
                 .setCarrierHRF(udiParts.get("21"));
-
             dev.addIdentifier().setType(new CodeableConcept()
                     .addCoding(new Coding()
                         .setSystem("http://hl7.org/fhir/identifier-type")
@@ -61,7 +59,6 @@ public class DevicesParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("UDI"));
-
             dev.setType(new CodeableConcept()
                 .addCoding(new Coding()
                     .setSystem("http://snomed.info/sct")
@@ -69,11 +66,9 @@ public class DevicesParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-
             dr.setSubject(pat);
             dr.setEncounter(enc);
             dr.setCode(new Reference("Device/DEV-" + (count + 1)));
-
             if (datasetUtility.hasProp(rec, "STOP"))
                 dr.setOccurrence(new Period()
                     .setStart(datasetUtility.parseDatetime(rec.get("START")))
@@ -83,25 +78,20 @@ public class DevicesParser extends BaseParser {
                 dr.setOccurrence(new Period()
                     .setStart(datasetUtility.parseDatetime(rec.get("START")))
                 );
-
             count++;
             devBuffer.add(dev);
             reqBuffer.add(dr);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 devBuffer.forEach(bb::addTransactionUpdateEntry);
                 reqBuffer.forEach(bb::addTransactionCreateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d devices", count);
-
+                    datasetUtility.logInfo("%d devices parsed", count);
                 devBuffer.clear();
                 reqBuffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL devices");
+        datasetUtility.logInfo("Devices parsed");
     }
 }

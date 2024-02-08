@@ -1,16 +1,12 @@
 package unisa.diem.parser;
 
 /**
- * Main loader class
+ * Main parsing class, which invokes all the unitary parsers
  */
 public class DatasetParser implements Parser {
+
     private final Parser[] parsers;
-// carica tutti i parser per poi mandarli sul server
-    /**
-     * Register all unitary loaders
-     *
-     * @param datasetUtility copy of the dataset service
-     */
+
     public DatasetParser(DatasetUtility datasetUtility) {
         this.parsers = new Parser[]{
             new PatientsParser(datasetUtility),
@@ -31,7 +27,7 @@ public class DatasetParser implements Parser {
     }
 
     /**
-     * Invokes, in order, the load method of each unitary loader
+     * Invokes, in order, the load method of each unitary parser
      */
     public void parseData() {
         for (Parser parser : parsers)
