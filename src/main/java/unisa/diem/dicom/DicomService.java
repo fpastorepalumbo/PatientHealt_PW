@@ -2,11 +2,12 @@ package unisa.diem.dicom;
 
 import com.pixelmed.dicom.DicomException;
 import com.pixelmed.dicom.TagFromName;
-import unisa.diem.fhir.FhirWrapper;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.Patient;
+import unisa.diem.fhir.FhirSingleton;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class DicomService {
      * @return filename part
      */
     private String getFilenamePart(ImagingStudy img) {
-        Patient patient = FhirWrapper.getClient().read().resource(Patient.class)
+        Patient patient = FhirSingleton.getClient().read().resource(Patient.class)
                 .withId(img.getSubject().getReference()).execute();
 
         String givenName = patient.getNameFirstRep().getGivenAsSingleString(),
@@ -127,7 +128,7 @@ public class DicomService {
     /**
      * Get the DICOM file corresponding to the given ImagingStudy resource and
      * encodes it in Base64.
-     *
+     * (CDA)
      * @param img ImagingStudy resource
      * @return Base64 encoded string of the DICOM corresponding DICOM file
      */

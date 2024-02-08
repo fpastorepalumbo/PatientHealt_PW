@@ -20,10 +20,10 @@ import java.util.logging.Logger;
 public class DicomHandle {
 
     private static final Logger logger = Logger.getLogger(DicomHandle.class.getName());
-    private final AttributeList attrs;
+    private final AttributeList attrs; //tag nel formato della libreria
     private int numRows;
     private int numCols;
-    private boolean isWord;
+    private boolean isWord; //byte rappr
     private boolean isRGB;
     private short[] shortPixelData;
     private byte[] bytePixelData;
@@ -35,7 +35,7 @@ public class DicomHandle {
 
     /**
      * Reads a DICOM file and returns its attribute list
-     *
+     * legge tutti gli attributi e va a popolare la attribute list
      * @param filePath path to the DICOM file
      * @return attribute list
      * @throws IOException    if the file is not found
