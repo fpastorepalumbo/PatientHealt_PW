@@ -12,8 +12,11 @@ import org.hl7.fhir.r4.model.Reference;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parsing of immunizations (vaccinations) data one at a time
+ */
 public class ImmunizationsParser extends BaseParser {
-//vaccinazioni
+
     ImmunizationsParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "immunizations");
     }
@@ -23,13 +26,10 @@ public class ImmunizationsParser extends BaseParser {
     public void parseData() {
         int count = 0;
         List<Immunization> buffer = new ArrayList<>();
-
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
-
             Immunization imm = new Immunization();
-
             imm.setRecorded(datasetUtility.parseDatetime(rec.get("DATE")));
             imm.setPatient(pat);
             imm.setEncounter(enc);
@@ -40,22 +40,17 @@ public class ImmunizationsParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-
             count++;
             buffer.add(imm);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d immunizations".formatted(count));
-
+                    datasetUtility.logInfo("%d immunizations parsed".formatted(count));
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL immunizations");
+        datasetUtility.logInfo("immunizations parsed");
     }
 }

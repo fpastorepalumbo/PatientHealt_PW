@@ -8,8 +8,12 @@ import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-//aziende, hanno dati in meno, sono aziende con assicurazioni medica
+
+/**
+ * Parsing of payers (private organizations that provide health insurance) data one at a time
+ */
 public class PayersParser extends BaseParser {
+
     PayersParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "payers");
     }
@@ -32,14 +36,11 @@ public class PayersParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("Id"));
-
             org.setName(rec.get("NAME"));
-
             org.addAddress()
                 .setCity(rec.get("CITY"))
                 .setState(rec.get("STATE_HEADQUARTERED"))
                 .setPostalCode(rec.get("ZIP"));
-
             if (datasetUtility.hasProp(rec, "LAT") && datasetUtility.hasProp(rec, "LON"))
                 org.addExtension()
                     .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
@@ -51,26 +52,20 @@ public class PayersParser extends BaseParser {
                         .setUrl("longitude")
                         .setValue(new DecimalType(rec.get("LON")))
                     );
-
             org.addTelecom()
                 .setSystem(ContactPoint.ContactPointSystem.PHONE)
                 .setValue(rec.get("PHONE"));
-
             count++;
             buffer.add(org);
-
             if (count % 10 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d payers".formatted(count));
-
+                    datasetUtility.logInfo(("%d payers parsed").formatted(count));
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL payers");
+        datasetUtility.logInfo("Payers parsed");
     }
 }

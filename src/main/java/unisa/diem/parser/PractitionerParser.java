@@ -10,8 +10,11 @@ import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parsing of practitioners (medical personnel including clinic secretaries) data one at a time
+ */
 public class PractitionerParser extends BaseParser {
-// tutto il personale medico anche quello relativo alla clinica(segretarie)
+
     PractitionerParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "providers");
     }
@@ -23,7 +26,6 @@ public class PractitionerParser extends BaseParser {
         int count = 0;
         for (CSVRecord rec : records) {
             Reference org = new Reference("Organization/" + rec.get("ORGANIZATION"));
-
             Practitioner provider = new Practitioner();
             provider.setId(rec.get("Id"));
             provider.addIdentifier()
@@ -36,20 +38,16 @@ public class PractitionerParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("Id"));
-
             provider.addName()
                 .setText(rec.get("NAME"));
-
             provider.addAddress()
                 .addLine(rec.get("ADDRESS"))
                 .setCity(rec.get("CITY"))
                 .setState(rec.get("STATE"))
                 .setPostalCode(rec.get("ZIP"));
-
             provider.setGender(
                 rec.get("GENDER").equals("M") ? AdministrativeGender.MALE : AdministrativeGender.FEMALE
             );
-
             provider.addQualification()
                 .setIssuer(org)
                 .setCode(new CodeableConcept()
@@ -58,7 +56,6 @@ public class PractitionerParser extends BaseParser {
                         .setDisplay(rec.get("SPECIALITY"))
                     )
                 );
-
             provider.addExtension()
                 .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
                 .setValue(new Address()
@@ -69,22 +66,18 @@ public class PractitionerParser extends BaseParser {
                     .setUrl("longitude")
                     .setValue(new DecimalType(rec.get("LON")))
                 );
-
             count++;
             buffer.add(provider);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d practitioners".formatted(count));
+                    datasetUtility.logInfo("%d practitioners parsed".formatted(count));
 
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL practitioners");
+        datasetUtility.logInfo("Practitioners parsed");
     }
 }

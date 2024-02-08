@@ -6,14 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="e94e36ce-43ff-441d-b5bd-3cb97e33da24" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/AllergiesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/AllergiesParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/BaseParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/BaseParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/CarePlansParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/CarePlansParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ConditionsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ConditionsParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetUtility.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DatasetUtility.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DevicesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DevicesParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/Parser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/Parser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/EncountersParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/EncountersParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImmunizationsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImmunizationsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/MedicationRequestsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/MedicationRequestsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ObservationsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ObservationsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/OrganizationsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/OrganizationsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PatientsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PatientsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PayersParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PayersParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PractitionerParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/PractitionerParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ProceduresParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ProceduresParser.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

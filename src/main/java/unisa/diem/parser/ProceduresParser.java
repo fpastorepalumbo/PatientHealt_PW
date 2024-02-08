@@ -11,8 +11,11 @@ import org.hl7.fhir.r4.model.Reference;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parsing of procedures (medical procedures, interventions, operations) data one at a time
+ */
 public class ProceduresParser extends BaseParser {
-// procedure mediche, interventi, operazioni
+
     ProceduresParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "procedures");
     }
@@ -21,16 +24,13 @@ public class ProceduresParser extends BaseParser {
     public void parseData() {
         int count = 0;
         List<Procedure> buffer = new ArrayList<>();
-
         for (CSVRecord record : records) {
             Reference pat = new Reference("Patient/" + record.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + record.get("ENCOUNTER"));
-
             Procedure proc = new Procedure();
             proc.getPerformedDateTimeType().setValueAsString(record.get("DATE"));
             proc.setSubject(pat);
             proc.setEncounter(enc);
-
             proc.setCode(new CodeableConcept()
                 .addCoding(new Coding()
                     .setSystem("http://snomed.info/sct")
@@ -38,7 +38,6 @@ public class ProceduresParser extends BaseParser {
                     .setDisplay(record.get("DESCRIPTION"))
                 )
             );
-
             proc.addReasonCode(new CodeableConcept()
                 .addCoding(new Coding()
                     .setSystem("http://snomed.info/sct")
@@ -46,22 +45,17 @@ public class ProceduresParser extends BaseParser {
                     .setDisplay(record.get("REASONDESCRIPTION"))
                 )
             );
-
             count++;
             buffer.add(proc);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d procedures", count);
-
+                    datasetUtility.logInfo("%d procedures parsed", count);
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL procedures");
+        datasetUtility.logInfo("Procedures parsed");
     }
 }

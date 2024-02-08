@@ -10,14 +10,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-//prescizioni medicinali, dettagli medicinale e prescrizione
+
+/**
+ * Parsing of medication requests (prescriptions, medication details, etc.) data one at a time
+ */
 public class MedicationRequestsParser extends BaseParser {
+
     private final Iterable<CSVRecord> encRecords;
     private final Map<String, CSVRecord> encIndex;
 
     MedicationRequestsParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "medications");
-
         encRecords = datasetUtility.parse("encounters");
         if (records == null || encRecords == null) {
             datasetUtility.logSevere("Failed to load medications");
@@ -25,6 +28,9 @@ public class MedicationRequestsParser extends BaseParser {
         encIndex = makeIndex();
     }
 
+    /**
+     * Creates a map of encounter IDs to their records
+     */
     private Map<String, CSVRecord> makeIndex() {
         Map<String, CSVRecord> index = new HashMap<>();
         for (CSVRecord rec : encRecords)
@@ -39,12 +45,9 @@ public class MedicationRequestsParser extends BaseParser {
         List<MedicationRequest> buffer = new ArrayList<>();
         List<Claim> clmBuffer = new ArrayList<>();
         List<ExplanationOfBenefit> eobBuffer = new ArrayList<>();
-
         for (CSVRecord rec : records) {
-
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
-
             MedicationRequest mst = new MedicationRequest();
             mst.setId("MR-" + (count + 1));
             mst.setSubject(pat);
@@ -56,7 +59,6 @@ public class MedicationRequestsParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-
             MedicationRequest.MedicationRequestDispenseRequestComponent dispense =
                 new MedicationRequest.MedicationRequestDispenseRequestComponent();
             if (datasetUtility.hasProp(rec, "STOP")) {
@@ -72,9 +74,7 @@ public class MedicationRequestsParser extends BaseParser {
                 mst.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
             }
             mst.setDispenseRequest(dispense);
-
-            // claim
-            Claim claim = new Claim();
+            Claim claim = new Claim(); // claim for the medication
             claim.setId("CM-" + (count + 1));
             claim.setPatient(pat);
             claim.setPrescription(new Reference("MedicationRequest/MR-" + (count + 1)));
@@ -82,7 +82,6 @@ public class MedicationRequestsParser extends BaseParser {
                 .setValue(Double.parseDouble(rec.get("TOTALCOST")))
                 .setCurrency("USD")
             );
-
             claim.addItem()
                 .addEncounter(enc)
                 .setQuantity(new Quantity()
@@ -99,12 +98,9 @@ public class MedicationRequestsParser extends BaseParser {
                     .setValue(Double.parseDouble(rec.get("TOTALCOST")))
                     .setCurrency("USD")
                 );
-
-            // eob
             String payId = encIndex.get(rec.get("ENCOUNTER")).get("PAYER");
             Reference pay = new Reference("Organization/" + payId);
-
-            ExplanationOfBenefit eob = new ExplanationOfBenefit();
+            ExplanationOfBenefit eob = new ExplanationOfBenefit(); // explanation of benefit for the medication
             eob.setId("EM-" + (count + 1));
             eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
@@ -125,28 +121,23 @@ public class MedicationRequestsParser extends BaseParser {
                     .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
                     .setCurrency("USD")
                 );
-
             count++;
             buffer.add(mst);
             clmBuffer.add(claim);
             eobBuffer.add(eob);
-
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 clmBuffer.forEach(bb::addTransactionUpdateEntry);
                 eobBuffer.forEach(bb::addTransactionUpdateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 1000 == 0)
-                    datasetUtility.logInfo("Loaded %d medication statements", count);
-
+                    datasetUtility.logInfo("%d medications parsed", count);
                 buffer.clear();
                 clmBuffer.clear();
                 eobBuffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL medication statements");
+        datasetUtility.logInfo("Medications parsed");
     }
 }

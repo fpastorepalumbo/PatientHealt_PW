@@ -16,15 +16,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Parsing of imaging studies (e.g. X-rays, MRIs, etc.) data one at a time
+ */
 public class ImagingStudiesParser extends BaseParser {
-//insieme di tutte tac/radio/eccccccc....
+
     private Map<String, String> patientIndex = new HashMap<>();
+
 
     ImagingStudiesParser(DatasetUtility datasetUtility) {
         super(datasetUtility, "imaging_studies");
         patientIndex = makeIndex();
     }
 
+    /**
+     * Creates a map of patient IDs to their first and last names
+     */
     private Map<String, String> makeIndex() {
         Map<String, String> index = new HashMap<>();
         for (CSVRecord rec : datasetUtility.parse("patients"))
@@ -37,20 +44,15 @@ public class ImagingStudiesParser extends BaseParser {
     public void parseData() {
         int count = 0;
         List<ImagingStudy> buffer = new ArrayList<>();
-
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
-
             String filename = patientIndex.get(rec.get("PATIENT")) + "_" + rec.get("PATIENT");
             DicomHandle dicom = datasetUtility.getDicomService().getDicomFile(filename);
-
             if (dicom == null)
                 continue;
-
             ImagingStudy is = new ImagingStudy();
             is.setId(rec.get("Id"));
-
             is.addIdentifier()
                 .setType(new CodeableConcept()
                     .addCoding(new Coding()
@@ -61,17 +63,14 @@ public class ImagingStudiesParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("Id"));
-
             is.setStarted(datasetUtility.parseDate(rec.get("DATE")));
             is.setSubject(pat);
             is.setEncounter(enc);
-
             is.addModality(new Coding()
                 .setSystem("http://dicom.nema.org/resources/ontology/DCM")
                 .setCode(rec.get("MODALITY_CODE"))
                 .setDisplay(rec.get("MODALITY_DESCRIPTION"))
             );
-
             ImagingStudy.ImagingStudySeriesComponent series = is.addSeries();
             if (dicom.hasAttr(TagFromName.SeriesDate))
                 series.setStarted(datasetUtility.parseDate(dicom.getFirstStringValue(TagFromName.SeriesDate)));
@@ -109,22 +108,17 @@ public class ImagingStudiesParser extends BaseParser {
                     .setCode(rec.get("SOP_CODE"))
                     .setDisplay(rec.get("SOP_DESCRIPTION"))
                 );
-
             count++;
             buffer.add(is);
-
             if (count % 10 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-
                 if (count % 100 == 0)
-                    datasetUtility.logInfo("Loaded %d imaging studies", count);
-
+                    datasetUtility.logInfo("%d imaging studies parsed", count);
                 buffer.clear();
             }
         }
-
-        datasetUtility.logInfo("Loaded ALL imaging studies");
+        datasetUtility.logInfo("Imaging studies parsed");
     }
 }
