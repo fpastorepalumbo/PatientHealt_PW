@@ -22,7 +22,6 @@ public class PatientsParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
         List<Patient> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Patient patient = new Patient();
@@ -113,8 +112,9 @@ public class PatientsParser extends BaseParser {
                         .setCode(rec.get("MARITAL"))
                     )
                 );
-            count++;
             buffer.add(patient);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry); //UPDATE
@@ -123,7 +123,19 @@ public class PatientsParser extends BaseParser {
                     datasetUtility.logInfo("%d patients parsed", count);
                 buffer.clear();
             }
+             */
         }
+        while (buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<Patient> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d patients parsed", upperSize);
+            buffer.removeAll(first100);
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Patients parsed");
     }
 }

@@ -24,7 +24,6 @@ public class ImmunizationsParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
         List<Immunization> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
@@ -40,8 +39,9 @@ public class ImmunizationsParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-            count++;
             buffer.add(imm);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
@@ -50,7 +50,21 @@ public class ImmunizationsParser extends BaseParser {
                     datasetUtility.logInfo("%d immunizations parsed".formatted(count));
                 buffer.clear();
             }
+             */
         }
+
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<Immunization> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d immunizations parsed", upperSize);
+            buffer.removeAll(first100);
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("immunizations parsed");
     }
 }

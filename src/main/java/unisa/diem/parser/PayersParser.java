@@ -22,7 +22,6 @@ public class PayersParser extends BaseParser {
     @SneakyThrows
     public void parseData() {
         List<Organization> buffer = new ArrayList<>();
-        int count = 0;
         for (CSVRecord rec : records) {
             Organization org = new Organization();
             org.setId(rec.get("Id"));
@@ -55,8 +54,9 @@ public class PayersParser extends BaseParser {
             org.addTelecom()
                 .setSystem(ContactPoint.ContactPointSystem.PHONE)
                 .setValue(rec.get("PHONE"));
-            count++;
             buffer.add(org);
+
+            /*
             if (count % 10 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
@@ -65,7 +65,21 @@ public class PayersParser extends BaseParser {
                     datasetUtility.logInfo(("%d payers parsed").formatted(count));
                 buffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<Organization> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d payers parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Payers parsed");
     }
 }

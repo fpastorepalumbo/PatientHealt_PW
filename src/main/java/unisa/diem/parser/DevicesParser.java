@@ -33,14 +33,14 @@ public class DevicesParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
+        int c = 0;
         List<Device> devBuffer = new ArrayList<>();
         List<DeviceRequest> reqBuffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
             Device dev = new Device();
-            dev.setId("DEV-" + (count + 1));
+            dev.setId("DEV-" + (c + 1));
             DeviceRequest dr = new DeviceRequest();
             dev.setPatient(pat);
             Map<String, String> udiParts = splitUDI(rec.get("UDI"));
@@ -68,7 +68,7 @@ public class DevicesParser extends BaseParser {
             );
             dr.setSubject(pat);
             dr.setEncounter(enc);
-            dr.setCode(new Reference("Device/DEV-" + (count + 1)));
+            dr.setCode(new Reference("Device/DEV-" + (c + 1)));
             if (datasetUtility.hasProp(rec, "STOP"))
                 dr.setOccurrence(new Period()
                     .setStart(datasetUtility.parseDatetime(rec.get("START")))
@@ -78,9 +78,11 @@ public class DevicesParser extends BaseParser {
                 dr.setOccurrence(new Period()
                     .setStart(datasetUtility.parseDatetime(rec.get("START")))
                 );
-            count++;
+            c++;
             devBuffer.add(dev);
             reqBuffer.add(dr);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 devBuffer.forEach(bb::addTransactionUpdateEntry);
@@ -91,7 +93,24 @@ public class DevicesParser extends BaseParser {
                 devBuffer.clear();
                 reqBuffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !devBuffer.isEmpty() && !reqBuffer.isEmpty()){
+            int upperSize = Math.min(100, devBuffer.size());
+            List<Device> first100 = devBuffer.subList(0, upperSize);
+            List<DeviceRequest> first100req = reqBuffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            first100req.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d devices parsed", upperSize);
+            devBuffer.removeAll(first100);
+            reqBuffer.removeAll(first100req);
+            count += 100;
+        }
+        devBuffer.clear();
+        reqBuffer.clear();
         datasetUtility.logInfo("Devices parsed");
     }
 }

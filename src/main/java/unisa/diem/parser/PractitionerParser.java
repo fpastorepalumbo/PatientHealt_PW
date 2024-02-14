@@ -23,7 +23,6 @@ public class PractitionerParser extends BaseParser {
     @SneakyThrows
     public void parseData() {
         List<Practitioner> buffer = new ArrayList<>();
-        int count = 0;
         for (CSVRecord rec : records) {
             Reference org = new Reference("Organization/" + rec.get("ORGANIZATION"));
             Practitioner provider = new Practitioner();
@@ -66,8 +65,9 @@ public class PractitionerParser extends BaseParser {
                     .setUrl("longitude")
                     .setValue(new DecimalType(rec.get("LON")))
                 );
-            count++;
             buffer.add(provider);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
@@ -77,7 +77,21 @@ public class PractitionerParser extends BaseParser {
 
                 buffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<Practitioner> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d practitioners parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Practitioners parsed");
     }
 }

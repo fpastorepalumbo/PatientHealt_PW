@@ -42,7 +42,6 @@ public class ImagingStudiesParser extends BaseParser {
     @SneakyThrows
     @Override
     public void parseData() {
-        int count = 0;
         List<ImagingStudy> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
@@ -108,8 +107,9 @@ public class ImagingStudiesParser extends BaseParser {
                     .setCode(rec.get("SOP_CODE"))
                     .setDisplay(rec.get("SOP_DESCRIPTION"))
                 );
-            count++;
             buffer.add(is);
+
+            /*
             if (count % 10 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
@@ -118,7 +118,21 @@ public class ImagingStudiesParser extends BaseParser {
                     datasetUtility.logInfo("%d imaging studies parsed", count);
                 buffer.clear();
             }
+            */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()){
+            int upperSize = Math.min(100, buffer.size());
+            List<ImagingStudy> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d imaging studies parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Imaging studies parsed");
     }
 }

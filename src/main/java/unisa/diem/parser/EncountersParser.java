@@ -21,7 +21,7 @@ public class EncountersParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
+        int c = 0;
         List<Encounter> encBuffer = new ArrayList<>();
         List<Claim> claimBuffer = new ArrayList<>();
         List<ExplanationOfBenefit> eobBuffer = new ArrayList<>();
@@ -63,7 +63,7 @@ public class EncountersParser extends BaseParser {
             );
             if (datasetUtility.hasProp(rec, "STOP"))
                 encounter.getPeriod().setEnd(datasetUtility.parseDatetime(rec.get("STOP")));
-            claim.setId("CE-" + (count + 1));
+            claim.setId("CE-" + (c + 1));
             claim.addItem()
                 .addEncounter(new Reference("Encounter/" + rec.get("Id")))
                 .setQuantity(new Quantity()
@@ -85,10 +85,10 @@ public class EncountersParser extends BaseParser {
                 .setValue(Double.parseDouble(rec.get("BASE_ENCOUNTER_COST")))
                 .setCurrency("USD")
             );
-            eob.setId("EE-" + (count + 1));
+            eob.setId("EE-" + (c + 1));
             eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
-            eob.setClaim(new Reference("Claim/CE-" + (count + 1)));
+            eob.setClaim(new Reference("Claim/CE-" + (c + 1)));
             eob.setPatient(pat);
             eob.setInsurer(pay);
             eob.getPayee().setParty(pat);
@@ -105,10 +105,12 @@ public class EncountersParser extends BaseParser {
                     .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
                     .setCurrency("USD")
                 );
-            count++;
+            c++;
             encBuffer.add(encounter);
             claimBuffer.add(claim);
             eobBuffer.add(eob);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 encBuffer.forEach(bb::addTransactionUpdateEntry);
@@ -121,7 +123,28 @@ public class EncountersParser extends BaseParser {
                 claimBuffer.clear();
                 eobBuffer.clear();
             }
+             */
         }
+
+        while (!encBuffer.isEmpty() && !claimBuffer.isEmpty() && !eobBuffer.isEmpty()){
+            int upperSize = Math.min(100, encBuffer.size());
+            List<Encounter> first100 = encBuffer.subList(0, upperSize);
+            List<Claim> first100C = claimBuffer.subList(0, upperSize);
+            List<ExplanationOfBenefit> first100E = eobBuffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            first100C.forEach(bb::addTransactionCreateEntry);
+            first100E.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d encounters parsed", upperSize);
+            encBuffer.removeAll(first100);
+            claimBuffer.removeAll(first100C);
+            eobBuffer.removeAll(first100E);
+        }
+
+        encBuffer.clear();
+        claimBuffer.clear();
+        eobBuffer.clear();
         datasetUtility.logInfo("Encounters parsed");
     }
 }

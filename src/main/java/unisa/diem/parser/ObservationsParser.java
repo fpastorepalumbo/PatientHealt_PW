@@ -21,6 +21,7 @@ public class ObservationsParser extends BaseParser {
     public void parseData() {
         int count = 0;
         List<Observation> buffer = new ArrayList<>();
+        List<Observation> bufferECG = new ArrayList<>();
         for (CSVRecord record : records) {
             Reference pat = new Reference("Patient/" + record.get("PATIENT"));
             Reference enc = null;
@@ -55,16 +56,36 @@ public class ObservationsParser extends BaseParser {
                 obs.setValue(new StringType(record.get("VALUE")));
             }
             count++;
-            buffer.add(obs);
-            if (count % 100 == 0 || count == records.size()) {
-                BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
-                buffer.forEach(bb::addTransactionCreateEntry);
-                FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-                if (count % 1000 == 0)
-                    datasetUtility.logInfo("%d observations parsed", count);
-                buffer.clear();
-            }
+            String value = record.get("VALUE");
+            if (value.length() > 10 && !value.contains(" "))
+                bufferECG.add(obs);
+            else
+                buffer.add(obs);
         }
+
+        while (!bufferECG.isEmpty()) {
+            int upperECGSize = Math.min(100, bufferECG.size());
+            List<Observation> first100 = bufferECG.subList(0, upperECGSize);
+            BundleBuilder bbECG = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bbECG::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bbECG.getBundle()).execute();
+            datasetUtility.logInfo("%d ECG observations parsed", upperECGSize);
+            bufferECG.removeAll(first100);
+        }
+
+        int c = 0;
+        while (c < 30000 && !buffer.isEmpty()){
+            int upperSize = Math.min(100, buffer.size());
+            List<Observation> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d observations parsed", upperSize);
+            buffer.removeAll(first100);
+            c += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Observations parsed");
     }
 }

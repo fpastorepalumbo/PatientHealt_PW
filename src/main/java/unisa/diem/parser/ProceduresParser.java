@@ -1,12 +1,9 @@
 package unisa.diem.parser;
 
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.r4.model.*;
 import unisa.diem.fhir.FhirSingleton;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Reference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +19,6 @@ public class ProceduresParser extends BaseParser {
 
     @Override
     public void parseData() {
-        int count = 0;
         List<Procedure> buffer = new ArrayList<>();
         for (CSVRecord record : records) {
             Reference pat = new Reference("Patient/" + record.get("PATIENT"));
@@ -45,8 +41,9 @@ public class ProceduresParser extends BaseParser {
                     .setDisplay(record.get("REASONDESCRIPTION"))
                 )
             );
-            count++;
             buffer.add(proc);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
@@ -55,7 +52,21 @@ public class ProceduresParser extends BaseParser {
                     datasetUtility.logInfo("%d procedures parsed", count);
                 buffer.clear();
             }
+            */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()){
+            int upperSize = Math.min(100, buffer.size());
+            List<Procedure> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d procedures parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Procedures parsed");
     }
 }

@@ -41,7 +41,7 @@ public class MedicationRequestsParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
+        int c = 0;
         List<MedicationRequest> buffer = new ArrayList<>();
         List<Claim> clmBuffer = new ArrayList<>();
         List<ExplanationOfBenefit> eobBuffer = new ArrayList<>();
@@ -49,7 +49,7 @@ public class MedicationRequestsParser extends BaseParser {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
             MedicationRequest mst = new MedicationRequest();
-            mst.setId("MR-" + (count + 1));
+            mst.setId("MR-" + (c + 1));
             mst.setSubject(pat);
             mst.setEncounter(enc);
             mst.setMedication(new CodeableConcept()
@@ -75,9 +75,9 @@ public class MedicationRequestsParser extends BaseParser {
             }
             mst.setDispenseRequest(dispense);
             Claim claim = new Claim(); // claim for the medication
-            claim.setId("CM-" + (count + 1));
+            claim.setId("CM-" + (c + 1));
             claim.setPatient(pat);
-            claim.setPrescription(new Reference("MedicationRequest/MR-" + (count + 1)));
+            claim.setPrescription(new Reference("MedicationRequest/MR-" + (c + 1)));
             claim.setTotal(new Money()
                 .setValue(Double.parseDouble(rec.get("TOTALCOST")))
                 .setCurrency("USD")
@@ -101,10 +101,10 @@ public class MedicationRequestsParser extends BaseParser {
             String payId = encIndex.get(rec.get("ENCOUNTER")).get("PAYER");
             Reference pay = new Reference("Organization/" + payId);
             ExplanationOfBenefit eob = new ExplanationOfBenefit(); // explanation of benefit for the medication
-            eob.setId("EM-" + (count + 1));
+            eob.setId("EM-" + (c + 1));
             eob.setStatus(ExplanationOfBenefit.ExplanationOfBenefitStatus.ACTIVE);
             eob.setOutcome(ExplanationOfBenefit.RemittanceOutcome.COMPLETE);
-            eob.setClaim(new Reference("Claim/CM-" + (count + 1)));
+            eob.setClaim(new Reference("Claim/CM-" + (c + 1)));
             eob.setPatient(pat);
             eob.setInsurer(pay);
             eob.getPayee().setParty(pat);
@@ -121,10 +121,12 @@ public class MedicationRequestsParser extends BaseParser {
                     .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
                     .setCurrency("USD")
                 );
-            count++;
+            c++;
             buffer.add(mst);
             clmBuffer.add(claim);
             eobBuffer.add(eob);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
@@ -137,7 +139,29 @@ public class MedicationRequestsParser extends BaseParser {
                 clmBuffer.clear();
                 eobBuffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()){
+            int upperSize = Math.min(100, buffer.size());
+            List<MedicationRequest> first100 = buffer.subList(0, upperSize);
+            List<Claim> clmFirst100 = clmBuffer.subList(0, upperSize);
+            List<ExplanationOfBenefit> eobFirst100 = eobBuffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            clmFirst100.forEach(bb::addTransactionCreateEntry);
+            eobFirst100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d medications parsed", upperSize);
+            buffer.removeAll(first100);
+            clmBuffer.removeAll(clmFirst100);
+            eobBuffer.removeAll(eobFirst100);
+            count += 100;
+        }
+
+        buffer.clear();
+        clmBuffer.clear();
+        eobBuffer.clear();
         datasetUtility.logInfo("Medications parsed");
     }
 }

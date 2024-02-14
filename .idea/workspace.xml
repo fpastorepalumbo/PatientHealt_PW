@@ -6,6 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="e94e36ce-43ff-441d-b5bd-3cb97e33da24" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/AllergiesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/AllergiesParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/CarePlansParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/CarePlansParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ConditionsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ConditionsParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DevicesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/DevicesParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/EncountersParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/EncountersParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImagingStudiesParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImmunizationsParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/unisa/diem/parser/ImmunizationsParser.java" afterDir="false" />
@@ -28,6 +34,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/Library/Java/JavaVirtualMachines/corretto-17.0.10/Contents/Home/lib/src.zip!/java.base/java/lang/ClassNotFoundException.java" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -122,6 +134,8 @@
       <workItem from="1701168545559" duration="252000" />
       <workItem from="1707211365207" duration="2935000" />
       <workItem from="1707214312989" duration="4714000" />
+      <workItem from="1707835611199" duration="59000" />
+      <workItem from="1707835678850" duration="18034000" />
     </task>
     <servers />
   </component>

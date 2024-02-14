@@ -21,7 +21,6 @@ public class AllergiesParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
         List<AllergyIntolerance> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             AllergyIntolerance alin = new AllergyIntolerance();
@@ -36,8 +35,9 @@ public class AllergiesParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-            count++;
             buffer.add(alin);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext()); //  creating the bundle to send to the server
                 buffer.forEach(bb::addTransactionCreateEntry); // adding the allergies to the bundle
@@ -46,7 +46,21 @@ public class AllergiesParser extends BaseParser {
                     datasetUtility.logInfo("%d allergies parsed", count); // logging the progress
                 buffer.clear();
             }
+            */
         }
-        datasetUtility.logInfo("Allergies parsed"); // logging the end of the process
+
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<AllergyIntolerance> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d allergies parsed", upperSize);
+            buffer.removeAll(first100);
+            count+=100;
+        }
+        buffer.clear();
+        datasetUtility.logInfo("Allergies parsed");
     }
 }

@@ -20,7 +20,6 @@ public class CarePlansParser extends BaseParser {
     @Override
     @SneakyThrows
     public void parseData() {
-        int count = 0;
         List<CarePlan> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
@@ -60,8 +59,9 @@ public class CarePlansParser extends BaseParser {
                 )
                 .setValue(rec.get("Id"))
                 .setSystem("urn:ietf:rfc:3986");
-            count++;
             buffer.add(cp);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
@@ -70,7 +70,21 @@ public class CarePlansParser extends BaseParser {
                     datasetUtility.logInfo("%d careplans parsed", count);
                 buffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()){
+            int upperSize = Math.min(100, buffer.size());
+            List<CarePlan> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d careplans parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Careplans parsed");
     }
 }

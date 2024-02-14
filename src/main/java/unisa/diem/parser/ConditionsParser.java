@@ -18,7 +18,6 @@ public class ConditionsParser extends BaseParser {
 
     @Override
     public void parseData() {
-        int count = 0;
         List<Condition> buffer = new ArrayList<>();
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
@@ -36,8 +35,9 @@ public class ConditionsParser extends BaseParser {
                     .setDisplay(rec.get("DESCRIPTION"))
                 )
             );
-            count++;
             buffer.add(cond);
+
+            /*
             if (count % 100 == 0 || count == records.size()) {
                 BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
@@ -46,7 +46,21 @@ public class ConditionsParser extends BaseParser {
                     datasetUtility.logInfo("%d conditions parsed".formatted(count));
                 buffer.clear();
             }
+             */
         }
+        int count = 0;
+        while (count < 30000 && !buffer.isEmpty()) {
+            int upperSize = Math.min(100, buffer.size());
+            List<Condition> first100 = buffer.subList(0, upperSize);
+            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+            first100.forEach(bb::addTransactionCreateEntry);
+            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
+            datasetUtility.logInfo("%d conditions parsed", upperSize);
+            buffer.removeAll(first100);
+            count += 100;
+        }
+
+        buffer.clear();
         datasetUtility.logInfo("Conditions parsed");
     }
 }
