@@ -31,11 +31,11 @@ public class AllergiesLoader extends BaseLoader {
             alin.setPatient(new Reference("Patient/" + rec.get("PATIENT")));
             alin.setEncounter(new Reference("Encounter/" + rec.get("ENCOUNTER")));
             alin.setCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             count++;
@@ -45,14 +45,11 @@ public class AllergiesLoader extends BaseLoader {
                 BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
-
-                //if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d allergies", count);
-
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d allergies", count);
                 buffer.clear();
             }
         }
-
-        //datasetService.logInfo("Loaded ALL allergies");
+        // datasetService.logInfo("Loaded ALL allergies");
     }
 }

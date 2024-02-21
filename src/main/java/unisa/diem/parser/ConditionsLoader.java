@@ -34,11 +34,11 @@ public class ConditionsLoader extends BaseLoader {
             cond.setEncounter(enc);
 
             cond.setCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             count++;
@@ -48,14 +48,11 @@ public class ConditionsLoader extends BaseLoader {
                 BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
-
-               // if (count % 1000 == 0)
-               //     datasetService.logInfo("Loaded %d conditions".formatted(count));
-
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d conditions".formatted(count));
                 buffer.clear();
             }
         }
-
-        //datasetService.logInfo("Loaded ALL conditions");
+        datasetService.logInfo("Loaded ALL conditions");
     }
 }

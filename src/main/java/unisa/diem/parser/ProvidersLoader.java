@@ -27,48 +27,48 @@ public class ProvidersLoader extends BaseLoader {
             Practitioner provider = new Practitioner();
             provider.setId(rec.get("Id"));
             provider.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("ANON")
-                        .setDisplay("Anonymous ID")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("ANON")
+                                    .setDisplay("Anonymous ID")
+                            )
                     )
-                )
-                .setSystem("urn:ietf:rfc:3986")
-                .setValue(rec.get("Id"));
+                    .setSystem("urn:ietf:rfc:3986")
+                    .setValue(rec.get("Id"));
 
             provider.addName()
-                .setText(rec.get("NAME"));
+                    .setText(rec.get("NAME"));
 
             provider.addAddress()
-                .addLine(rec.get("ADDRESS"))
-                .setCity(rec.get("CITY"))
-                .setState(rec.get("STATE"))
-                .setPostalCode(rec.get("ZIP"));
+                    .addLine(rec.get("ADDRESS"))
+                    .setCity(rec.get("CITY"))
+                    .setState(rec.get("STATE"))
+                    .setPostalCode(rec.get("ZIP"));
 
             provider.setGender(
-                rec.get("GENDER").equals("M") ? AdministrativeGender.MALE : AdministrativeGender.FEMALE
+                    rec.get("GENDER").equals("M") ? AdministrativeGender.MALE : AdministrativeGender.FEMALE
             );
 
             provider.addQualification()
-                .setIssuer(org)
-                .setCode(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://snomed.info/sct")
-                        .setDisplay(rec.get("SPECIALITY"))
-                    )
-                );
+                    .setIssuer(org)
+                    .setCode(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://snomed.info/sct")
+                                    .setDisplay(rec.get("SPECIALITY"))
+                            )
+                    );
 
             provider.addExtension()
-                .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
-                .setValue(new Address()
-                    .addExtension()
-                    .setUrl("latitude")
-                    .setValue(new DecimalType(rec.get("LAT")))
-                    .addExtension()
-                    .setUrl("longitude")
-                    .setValue(new DecimalType(rec.get("LON")))
-                );
+                    .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
+                    .setValue(new Address()
+                            .addExtension()
+                            .setUrl("latitude")
+                            .setValue(new DecimalType(rec.get("LAT")))
+                            .addExtension()
+                            .setUrl("longitude")
+                            .setValue(new DecimalType(rec.get("LON")))
+                    );
 
             count++;
             buffer.add(provider);
@@ -78,13 +78,12 @@ public class ProvidersLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-                //if (count % 1000 == 0)
-                 //   datasetService.logInfo("Loaded %d practitioners".formatted(count));
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d practitioners".formatted(count));
 
                 buffer.clear();
             }
         }
-
-      //  datasetService.logInfo("Loaded ALL practitioners");
+        datasetService.logInfo("Loaded ALL practitioners");
     }
 }

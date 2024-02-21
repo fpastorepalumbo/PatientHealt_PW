@@ -36,12 +36,12 @@ public class FhirService {
      */
     public Claim getClaim(Encounter res) {
         return getClient().search().forResource(Claim.class)
-            .where(Claim.ENCOUNTER.hasId("Encounter/" + res.getIdElement().getIdPart()))
-            .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
-            .execute().getEntry().stream()
-            .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
-            .map(Claim.class::cast)
-            .findFirst().orElse(null);
+                .where(Claim.ENCOUNTER.hasId("Encounter/" + res.getIdElement().getIdPart()))
+                .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
+                .execute().getEntry().stream()
+                .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
+                .map(Claim.class::cast)
+                .findFirst().orElse(null);
     }
 
     /**
@@ -52,12 +52,12 @@ public class FhirService {
      */
     public Claim getClaim(MedicationRequest res) {
         return getClient().search().forResource(Claim.class)
-            .where(Claim.ENCOUNTER.hasId(res.getEncounter().getReference()))
-            .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
-            .execute().getEntry().stream()
-            .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
-            .map(Claim.class::cast)
-            .toList().get(1);
+                .where(Claim.ENCOUNTER.hasId(res.getEncounter().getReference()))
+                .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
+                .execute().getEntry().stream()
+                .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
+                .map(Claim.class::cast)
+                .toList().get(1);
     }
 
     /**
@@ -68,12 +68,12 @@ public class FhirService {
      */
     public ExplanationOfBenefit getEOB(Encounter res) {
         return getClient().search().forResource(ExplanationOfBenefit.class)
-            .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
-            .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
-            .execute().getEntry().stream()
-            .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
-            .map(ExplanationOfBenefit.class::cast)
-            .findFirst().orElse(null);
+                .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
+                .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
+                .execute().getEntry().stream()
+                .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
+                .map(ExplanationOfBenefit.class::cast)
+                .findFirst().orElse(null);
     }
 
     /**
@@ -84,11 +84,11 @@ public class FhirService {
      */
     public ExplanationOfBenefit getEOB(MedicationRequest res) {
         return getClient().search().forResource(ExplanationOfBenefit.class)
-            .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
-            .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
-            .execute().getEntry().stream()
-            .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
-            .map(ExplanationOfBenefit.class::cast)
-            .findFirst().orElse(null);
+                .where(ExplanationOfBenefit.CLAIM.hasId("Claim/" + getClaim(res).getIdElement().getIdPart()))
+                .returnBundle(org.hl7.fhir.r4.model.Bundle.class)
+                .execute().getEntry().stream()
+                .map(org.hl7.fhir.r4.model.Bundle.BundleEntryComponent::getResource)
+                .map(ExplanationOfBenefit.class::cast)
+                .findFirst().orElse(null);
     }
 }

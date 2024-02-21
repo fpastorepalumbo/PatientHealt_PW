@@ -23,11 +23,11 @@ public class DicomService {
     /**
      * Returns the filename part of a DICOM file.
      * In the Coherent dataset a dicom filename is in the format:
-     * 
+     *
      * <pre>
      * {PATIENT_NAME}_{PATIENT_SURNAME}_{PATIENT_UID}_{DICOM_StudyInstanceUID}.dcm
      * </pre>
-     * 
+     * <p>
      * This method returns the first three parts of the filename. The last is
      * embedded inside the DICOM metadata.
      * This is useful to restrict the number of DICOM files to be read.

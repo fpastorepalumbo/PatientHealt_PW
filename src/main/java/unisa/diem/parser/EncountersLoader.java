@@ -36,37 +36,37 @@ public class EncountersLoader extends BaseLoader {
 
             encounter.setId(rec.get("Id"));
             encounter.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("ANON")
-                        .setDisplay("Anonymous ID")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("ANON")
+                                    .setDisplay("Anonymous ID")
+                            )
                     )
-                )
-                .setSystem("urn:ietf:rfc:3986")
-                .setValue(rec.get("Id"));
+                    .setSystem("urn:ietf:rfc:3986")
+                    .setValue(rec.get("Id"));
 
             encounter.setSubject(pat);
             encounter.addParticipant()
-                .setIndividual(pro);
+                    .setIndividual(pro);
             encounter.setServiceProvider(org);
 
             encounter.addType()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                );
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    );
 
             encounter.addReasonCode()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("REASONCODE"))
-                    .setDisplay(rec.get("REASONDESCRIPTION"))
-                );
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("REASONCODE"))
+                            .setDisplay(rec.get("REASONDESCRIPTION"))
+                    );
 
             encounter.setPeriod(new Period()
-                .setStart(datasetService.parseDatetime(rec.get("START")))
+                    .setStart(datasetService.parseDatetime(rec.get("START")))
             );
 
             if (datasetService.hasProp(rec, "STOP"))
@@ -74,26 +74,26 @@ public class EncountersLoader extends BaseLoader {
 
             claim.setId("CE-" + (count + 1));
             claim.addItem()
-                .addEncounter(new Reference("Encounter/" + rec.get("Id")))
-                .setQuantity(new Quantity()
-                    .setValue(1)
-                    .setUnit("#")
-                    .setSystem("http://unitsofmeasure.org")
-                    .setCode("#")
-                )
-                .setUnitPrice(new Money()
-                    .setValue(Double.parseDouble(rec.get("BASE_ENCOUNTER_COST")))
-                    .setCurrency("USD")
-                )
-                .setNet(new Money()
-                    .setValue(Double.parseDouble(rec.get("TOTAL_CLAIM_COST")))
-                    .setCurrency("USD")
-                );
+                    .addEncounter(new Reference("Encounter/" + rec.get("Id")))
+                    .setQuantity(new Quantity()
+                            .setValue(1)
+                            .setUnit("#")
+                            .setSystem("http://unitsofmeasure.org")
+                            .setCode("#")
+                    )
+                    .setUnitPrice(new Money()
+                            .setValue(Double.parseDouble(rec.get("BASE_ENCOUNTER_COST")))
+                            .setCurrency("USD")
+                    )
+                    .setNet(new Money()
+                            .setValue(Double.parseDouble(rec.get("TOTAL_CLAIM_COST")))
+                            .setCurrency("USD")
+                    );
 
             claim.setPatient(pat);
             claim.setTotal(new Money()
-                .setValue(Double.parseDouble(rec.get("BASE_ENCOUNTER_COST")))
-                .setCurrency("USD")
+                    .setValue(Double.parseDouble(rec.get("BASE_ENCOUNTER_COST")))
+                    .setCurrency("USD")
             );
 
             eob.setId("EE-" + (count + 1));
@@ -105,18 +105,18 @@ public class EncountersLoader extends BaseLoader {
             eob.getPayee().setParty(pat);
 
             eob.addItem()
-                .addEncounter(new Reference("Encounter/" + rec.get("Id")))
-                .addAdjudication()
-                .setCategory(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/adjudication")
-                        .setCode("benefit")
+                    .addEncounter(new Reference("Encounter/" + rec.get("Id")))
+                    .addAdjudication()
+                    .setCategory(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/adjudication")
+                                    .setCode("benefit")
+                            )
                     )
-                )
-                .setAmount(new Money()
-                    .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
-                    .setCurrency("USD")
-                );
+                    .setAmount(new Money()
+                            .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
+                            .setCurrency("USD")
+                    );
 
             count++;
             encBuffer.add(encounter);
@@ -130,16 +130,14 @@ public class EncountersLoader extends BaseLoader {
                 eobBuffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-                //if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d encounters", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d encounters", count);
 
                 encBuffer.clear();
                 claimBuffer.clear();
                 eobBuffer.clear();
             }
         }
-
-
-      //  datasetService.logInfo("loaded ALL encounters");
+        datasetService.logInfo("loaded ALL encounters");
     }
 }

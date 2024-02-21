@@ -39,33 +39,33 @@ public class CarePlansLoader extends BaseLoader {
             cp.setEncounter(enc);
 
             cp.addCategory(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             cp.addActivity()
-                .getDetail()
-                .addReasonCode(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://snomed.info/sct")
-                        .setCode(rec.get("REASONCODE"))
-                        .setDisplay(rec.get("REASONDESCRIPTION"))
-                    )
-                );
+                    .getDetail()
+                    .addReasonCode(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://snomed.info/sct")
+                                    .setCode(rec.get("REASONCODE"))
+                                    .setDisplay(rec.get("REASONDESCRIPTION"))
+                            )
+                    );
 
             cp.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("ANON")
-                        .setDisplay("Anonymous ID")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("ANON")
+                                    .setDisplay("Anonymous ID")
+                            )
                     )
-                )
-                .setValue(rec.get("Id"))
-                .setSystem("urn:ietf:rfc:3986");
+                    .setValue(rec.get("Id"))
+                    .setSystem("urn:ietf:rfc:3986");
 
             count++;
             buffer.add(cp);
@@ -74,14 +74,11 @@ public class CarePlansLoader extends BaseLoader {
                 BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
-
-                //if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d careplans", count);
-
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d careplans", count);
                 buffer.clear();
             }
         }
-
-        //datasetService.logInfo("Loaded ALL careplans");
+        datasetService.logInfo("Loaded ALL careplans");
     }
 }

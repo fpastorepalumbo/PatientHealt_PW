@@ -52,24 +52,24 @@ public class ImagingStudiesLoader extends BaseLoader {
             is.setId(rec.get("Id"));
 
             is.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("ANON")
-                        .setDisplay("Anonymous ID")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("ANON")
+                                    .setDisplay("Anonymous ID")
+                            )
                     )
-                )
-                .setSystem("urn:ietf:rfc:3986")
-                .setValue(rec.get("Id"));
+                    .setSystem("urn:ietf:rfc:3986")
+                    .setValue(rec.get("Id"));
 
             is.setStarted(datasetService.parseDate(rec.get("DATE")));
             is.setSubject(pat);
             is.setEncounter(enc);
 
             is.addModality(new Coding()
-                .setSystem("http://dicom.nema.org/resources/ontology/DCM")
-                .setCode(rec.get("MODALITY_CODE"))
-                .setDisplay(rec.get("MODALITY_DESCRIPTION"))
+                    .setSystem("http://dicom.nema.org/resources/ontology/DCM")
+                    .setCode(rec.get("MODALITY_CODE"))
+                    .setDisplay(rec.get("MODALITY_DESCRIPTION"))
             );
 
             ImagingStudy.ImagingStudySeriesComponent series = is.addSeries();
@@ -79,36 +79,36 @@ public class ImagingStudiesLoader extends BaseLoader {
             series.setNumber(dicom.getInt(TagFromName.SeriesNumber));
             series.setDescription(dicom.getString(TagFromName.SeriesDescription));
             series.setBodySite(new Coding()
-                .setSystem("http://snomed.info/sct")
-                .setCode(rec.get("BODYSITE_CODE"))
-                .setDisplay(rec.get("BODYSITE_DESCRIPTION"))
-            );
-            series.setLaterality(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(dicom.getString(TagFromName.Laterality))
-                )
-                .setNumberOfInstances(
-                    dicom.hasAttr(TagFromName.NumberOfSeriesRelatedInstances) ?
-                        dicom.getInt(TagFromName.NumberOfSeriesRelatedInstances) : 1
-                )
-                .setModality(new Coding()
-                    .setSystem("http://dicom.nema.org/resources/ontology/DCM")
-                    .setCode(rec.get("MODALITY_CODE"))
-                    .setDisplay(rec.get("MODALITY_DESCRIPTION"))
-                )
-                .setBodySite(new Coding()
                     .setSystem("http://snomed.info/sct")
                     .setCode(rec.get("BODYSITE_CODE"))
                     .setDisplay(rec.get("BODYSITE_DESCRIPTION"))
-                )
-                .addInstance()
-                .setUid(dicom.getString(TagFromName.SOPInstanceUID))
-                .setNumber(dicom.getInt(TagFromName.InstanceNumber))
-                .setSopClass(new Coding()
-                    .setSystem("http://dicom.nema.org/resources/ontology/DCM")
-                    .setCode(rec.get("SOP_CODE"))
-                    .setDisplay(rec.get("SOP_DESCRIPTION"))
-                );
+            );
+            series.setLaterality(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(dicom.getString(TagFromName.Laterality))
+                    )
+                    .setNumberOfInstances(
+                            dicom.hasAttr(TagFromName.NumberOfSeriesRelatedInstances) ?
+                                    dicom.getInt(TagFromName.NumberOfSeriesRelatedInstances) : 1
+                    )
+                    .setModality(new Coding()
+                            .setSystem("http://dicom.nema.org/resources/ontology/DCM")
+                            .setCode(rec.get("MODALITY_CODE"))
+                            .setDisplay(rec.get("MODALITY_DESCRIPTION"))
+                    )
+                    .setBodySite(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("BODYSITE_CODE"))
+                            .setDisplay(rec.get("BODYSITE_DESCRIPTION"))
+                    )
+                    .addInstance()
+                    .setUid(dicom.getString(TagFromName.SOPInstanceUID))
+                    .setNumber(dicom.getInt(TagFromName.InstanceNumber))
+                    .setSopClass(new Coding()
+                            .setSystem("http://dicom.nema.org/resources/ontology/DCM")
+                            .setCode(rec.get("SOP_CODE"))
+                            .setDisplay(rec.get("SOP_DESCRIPTION"))
+                    );
 
             count++;
             buffer.add(is);
@@ -118,13 +118,12 @@ public class ImagingStudiesLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-               // if (count % 100 == 0)
-               //     datasetService.logInfo("Loaded %d imaging studies", count);
+                if (count % 100 == 0)
+                    datasetService.logInfo("Loaded %d imaging studies", count);
 
                 buffer.clear();
             }
         }
-
-        //datasetService.logInfo("Loaded ALL imaging studies");
+        datasetService.logInfo("Loaded ALL imaging studies");
     }
 }

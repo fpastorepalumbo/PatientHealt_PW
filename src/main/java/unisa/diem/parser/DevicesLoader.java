@@ -19,11 +19,11 @@ public class DevicesLoader extends BaseLoader {
     private Map<String, String> splitUDI(String udi) {
         String[] parts = udi.split("\\(([0-9]{2})\\)");
         return Map.of(
-            "01", parts[1],
-            "11", parts[2],
-            "17", parts[3],
-            "10", parts[4],
-            "21", parts[5]
+                "01", parts[1],
+                "11", parts[2],
+                "17", parts[3],
+                "10", parts[4],
+                "21", parts[5]
         );
     }
 
@@ -46,28 +46,28 @@ public class DevicesLoader extends BaseLoader {
 
             Map<String, String> udiParts = splitUDI(rec.get("UDI"));
             dev.addUdiCarrier()
-                .setDeviceIdentifier(udiParts.get("01"))
-                .setIssuer(udiParts.get("11"))
-                .setJurisdiction(udiParts.get("17"))
-                .setCarrierAIDC(udiParts.get("10").getBytes())
-                .setCarrierHRF(udiParts.get("21"));
+                    .setDeviceIdentifier(udiParts.get("01"))
+                    .setIssuer(udiParts.get("11"))
+                    .setJurisdiction(udiParts.get("17"))
+                    .setCarrierAIDC(udiParts.get("10").getBytes())
+                    .setCarrierHRF(udiParts.get("21"));
 
             dev.addIdentifier().setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://hl7.org/fhir/identifier-type")
-                        .setCode("UDI")
-                        .setDisplay("Universal Device Identifier")
+                            .addCoding(new Coding()
+                                    .setSystem("http://hl7.org/fhir/identifier-type")
+                                    .setCode("UDI")
+                                    .setDisplay("Universal Device Identifier")
+                            )
                     )
-                )
-                .setSystem("urn:ietf:rfc:3986")
-                .setValue(rec.get("UDI"));
+                    .setSystem("urn:ietf:rfc:3986")
+                    .setValue(rec.get("UDI"));
 
             dev.setType(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             dr.setSubject(pat);
@@ -76,12 +76,12 @@ public class DevicesLoader extends BaseLoader {
 
             if (datasetService.hasProp(rec, "STOP"))
                 dr.setOccurrence(new Period()
-                    .setStart(datasetService.parseDatetime(rec.get("START")))
-                    .setEnd(datasetService.parseDatetime(rec.get("STOP")))
+                        .setStart(datasetService.parseDatetime(rec.get("START")))
+                        .setEnd(datasetService.parseDatetime(rec.get("STOP")))
                 );
             else
                 dr.setOccurrence(new Period()
-                    .setStart(datasetService.parseDatetime(rec.get("START")))
+                        .setStart(datasetService.parseDatetime(rec.get("START")))
                 );
 
             count++;
@@ -94,14 +94,13 @@ public class DevicesLoader extends BaseLoader {
                 reqBuffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-               // if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d devices", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d devices", count);
 
                 devBuffer.clear();
                 reqBuffer.clear();
             }
         }
-
-       // datasetService.logInfo("Loaded ALL devices");
+        datasetService.logInfo("Loaded ALL devices");
     }
 }

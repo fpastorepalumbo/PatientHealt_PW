@@ -32,19 +32,19 @@ public class ProceduresLoader extends BaseLoader {
             proc.setEncounter(enc);
 
             proc.setCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(record.get("CODE"))
-                    .setDisplay(record.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(record.get("CODE"))
+                            .setDisplay(record.get("DESCRIPTION"))
+                    )
             );
 
             proc.addReasonCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(record.get("REASONCODE"))
-                    .setDisplay(record.get("REASONDESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(record.get("REASONCODE"))
+                            .setDisplay(record.get("REASONDESCRIPTION"))
+                    )
             );
 
             count++;
@@ -55,13 +55,12 @@ public class ProceduresLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-               // if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d procedures", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d procedures", count);
 
                 buffer.clear();
             }
         }
-
-     //   datasetService.logInfo("Loaded ALL procedures");
+        datasetService.logInfo("Loaded ALL procedures");
     }
 }

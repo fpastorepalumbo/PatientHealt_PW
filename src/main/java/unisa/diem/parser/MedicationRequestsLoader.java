@@ -20,7 +20,7 @@ public class MedicationRequestsLoader extends BaseLoader {
 
         encRecords = datasetService.parse("encounters");
         if (records == null || encRecords == null) {
-           // datasetService.logSevere("Failed to load medications");
+            // datasetService.logSevere("Failed to load medications");
         }
         encIndex = makeIndex();
     }
@@ -50,24 +50,24 @@ public class MedicationRequestsLoader extends BaseLoader {
             mst.setSubject(pat);
             mst.setEncounter(enc);
             mst.setMedication(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://snomed.info/sct")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://snomed.info/sct")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             MedicationRequest.MedicationRequestDispenseRequestComponent dispense =
-                new MedicationRequest.MedicationRequestDispenseRequestComponent();
+                    new MedicationRequest.MedicationRequestDispenseRequestComponent();
             if (datasetService.hasProp(rec, "STOP")) {
                 dispense.setValidityPeriod(new Period()
-                    .setStart(datasetService.parseDatetime(rec.get("START")))
-                    .setEnd(datasetService.parseDatetime(rec.get("STOP")))
+                        .setStart(datasetService.parseDatetime(rec.get("START")))
+                        .setEnd(datasetService.parseDatetime(rec.get("STOP")))
                 );
                 mst.setStatus(MedicationRequest.MedicationRequestStatus.COMPLETED);
             } else {
                 dispense.setValidityPeriod(new Period()
-                    .setStart(datasetService.parseDatetime(rec.get("START")))
+                        .setStart(datasetService.parseDatetime(rec.get("START")))
                 );
                 mst.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
             }
@@ -79,26 +79,26 @@ public class MedicationRequestsLoader extends BaseLoader {
             claim.setPatient(pat);
             claim.setPrescription(new Reference("MedicationRequest/MR-" + (count + 1)));
             claim.setTotal(new Money()
-                .setValue(Double.parseDouble(rec.get("TOTALCOST")))
-                .setCurrency("USD")
+                    .setValue(Double.parseDouble(rec.get("TOTALCOST")))
+                    .setCurrency("USD")
             );
 
             claim.addItem()
-                .addEncounter(enc)
-                .setQuantity(new Quantity()
-                    .setValue(Integer.parseInt(rec.get("DISPENSES")))
-                    .setUnit("#")
-                    .setSystem("http://unitsofmeasure.org")
-                    .setCode("#")
-                )
-                .setUnitPrice(new Money()
-                    .setValue(Double.parseDouble(rec.get("BASE_COST")))
-                    .setCurrency("USD")
-                )
-                .setNet(new Money()
-                    .setValue(Double.parseDouble(rec.get("TOTALCOST")))
-                    .setCurrency("USD")
-                );
+                    .addEncounter(enc)
+                    .setQuantity(new Quantity()
+                            .setValue(Integer.parseInt(rec.get("DISPENSES")))
+                            .setUnit("#")
+                            .setSystem("http://unitsofmeasure.org")
+                            .setCode("#")
+                    )
+                    .setUnitPrice(new Money()
+                            .setValue(Double.parseDouble(rec.get("BASE_COST")))
+                            .setCurrency("USD")
+                    )
+                    .setNet(new Money()
+                            .setValue(Double.parseDouble(rec.get("TOTALCOST")))
+                            .setCurrency("USD")
+                    );
 
             // eob
             String payId = encIndex.get(rec.get("ENCOUNTER")).get("PAYER");
@@ -113,18 +113,18 @@ public class MedicationRequestsLoader extends BaseLoader {
             eob.setInsurer(pay);
             eob.getPayee().setParty(pat);
             eob.addItem()
-                .addEncounter(enc)
-                .addAdjudication()
-                .setCategory(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/adjudication")
-                        .setCode("benefit")
+                    .addEncounter(enc)
+                    .addAdjudication()
+                    .setCategory(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/adjudication")
+                                    .setCode("benefit")
+                            )
                     )
-                )
-                .setAmount(new Money()
-                    .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
-                    .setCurrency("USD")
-                );
+                    .setAmount(new Money()
+                            .setValue(Double.parseDouble(rec.get("PAYER_COVERAGE")))
+                            .setCurrency("USD")
+                    );
 
             count++;
             buffer.add(mst);
@@ -138,15 +138,14 @@ public class MedicationRequestsLoader extends BaseLoader {
                 eobBuffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-                //if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d medication statements", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d medication statements", count);
 
                 buffer.clear();
                 clmBuffer.clear();
                 eobBuffer.clear();
             }
         }
-
-       // datasetService.logInfo("Loaded ALL medication statements");
+        datasetService.logInfo("Loaded ALL medication statements");
     }
 }

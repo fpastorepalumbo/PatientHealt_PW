@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import unisa.diem.parser.DatasetService;
 
 /*
-    * Use the load Dataset function to load the dataset
+ * Use the load Dataset function to load the dataset
  */
 public class Main {
     @SneakyThrows

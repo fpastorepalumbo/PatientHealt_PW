@@ -34,13 +34,13 @@ public class ObservationsLoader extends BaseLoader {
                 obs.setEncounter(enc);
 
             obs.setCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem(record.get("CODE").equals("29303009")
-                        ? "http://snomed.info/sct" : "http://loinc.org"
+                    .addCoding(new Coding()
+                            .setSystem(record.get("CODE").equals("29303009")
+                                    ? "http://snomed.info/sct" : "http://loinc.org"
+                            )
+                            .setCode(record.get("CODE"))
+                            .setDisplay(record.get("DESCRIPTION"))
                     )
-                    .setCode(record.get("CODE"))
-                    .setDisplay(record.get("DESCRIPTION"))
-                )
             );
 
             String unitStr = record.get("UNITS");
@@ -66,13 +66,12 @@ public class ObservationsLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-                //if (count % 1000 == 0)
-                //    datasetService.logInfo("Loaded %d observations", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d observations", count);
 
                 buffer.clear();
             }
         }
-
-       // datasetService.logInfo("Loaded ALL observations");
+        datasetService.logInfo("Loaded ALL observations");
     }
 }

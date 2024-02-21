@@ -7,15 +7,16 @@ import org.apache.commons.csv.CSVRecord;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+// import java.nio.file.Files;
+// import java.nio.file.Path;
+// import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Service bean with utility methods for dealing with CSV records.
@@ -40,7 +41,8 @@ public class DatasetService {
      * @param args format arguments
      */
     public void logInfo(String fmt, Object... args) {
-       // logger.info(String.format(fmt, args));
+        logger.setLevel(Level.INFO);
+        logger.info(String.format(fmt, args));
     }
 
     /**
@@ -91,7 +93,7 @@ public class DatasetService {
             String filePath = basePath + "/csv/" + subject + ".csv";
             return csvFormat.parse(new FileReader(filePath)).getRecords();
         } catch (IOException e) {
-            //logger.severe(e.getMessage());
+            logger.severe(e.getMessage());
             return null;
         }
     }
@@ -126,10 +128,10 @@ public class DatasetService {
      * @throws IOException if file errors arise
      */
     public void loadDataset() throws IOException {
-        Path path = Paths.get("ds_loaded_ok");
-        if (!Files.exists(path)) {
+        // Path path = Paths.get("ds_loaded_ok");
+        // if (!Files.exists(path)) {
             new DatasetLoader(this).load();
-            Files.createFile(path);
-        }
+            // Files.createFile(path);
+        // }
     }
 }

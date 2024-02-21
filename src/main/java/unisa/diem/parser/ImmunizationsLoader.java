@@ -34,11 +34,11 @@ public class ImmunizationsLoader extends BaseLoader {
             imm.setPatient(pat);
             imm.setEncounter(enc);
             imm.setVaccineCode(new CodeableConcept()
-                .addCoding(new Coding()
-                    .setSystem("http://hl7.org/fhir/sid/cvx")
-                    .setCode(rec.get("CODE"))
-                    .setDisplay(rec.get("DESCRIPTION"))
-                )
+                    .addCoding(new Coding()
+                            .setSystem("http://hl7.org/fhir/sid/cvx")
+                            .setCode(rec.get("CODE"))
+                            .setDisplay(rec.get("DESCRIPTION"))
+                    )
             );
 
             count++;
@@ -49,13 +49,12 @@ public class ImmunizationsLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionCreateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-               // if (count % 1000 == 0)
-               //     datasetService.logInfo("Loaded %d immunizations".formatted(count));
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d immunizations".formatted(count));
 
                 buffer.clear();
             }
         }
-
-        // datasetService.logInfo("Loaded ALL immunizations");
+        datasetService.logInfo("Loaded ALL immunizations");
     }
 }

@@ -27,31 +27,31 @@ public class PatientsLoader extends BaseLoader {
             patient.setId(rec.get("Id"));
 
             patient.addExtension()
-                .setUrl("http://hl7.org/fhir/StructureDefinition/patient-birthPlace")
-                .setValue(new Address().setText(rec.get("BIRTHPLACE")));
+                    .setUrl("http://hl7.org/fhir/StructureDefinition/patient-birthPlace")
+                    .setValue(new Address().setText(rec.get("BIRTHPLACE")));
 
             if (datasetService.hasProp(rec, "MAIDEN"))
                 patient.addExtension()
-                    .setUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName")
-                    .setValue(new StringType(rec.get("MAIDEN")));
+                        .setUrl("http://hl7.org/fhir/StructureDefinition/patient-mothersMaidenName")
+                        .setValue(new StringType(rec.get("MAIDEN")));
 
             patient.addAddress()
-                .addLine(rec.get("ADDRESS"))
-                .setCity(rec.get("CITY"))
-                .setState(rec.get("STATE"))
-                .setPostalCode(rec.get("ZIP"))
-                .setDistrict(rec.get("COUNTY"));
+                    .addLine(rec.get("ADDRESS"))
+                    .setCity(rec.get("CITY"))
+                    .setState(rec.get("STATE"))
+                    .setPostalCode(rec.get("ZIP"))
+                    .setDistrict(rec.get("COUNTY"));
 
             patient.addExtension()
-                .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
-                .setValue(new Address()
-                    .addExtension()
-                    .setUrl("latitude")
-                    .setValue(new DecimalType(rec.get("LAT")))
-                    .addExtension()
-                    .setUrl("longitude")
-                    .setValue(new DecimalType(rec.get("LON")))
-                );
+                    .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
+                    .setValue(new Address()
+                            .addExtension()
+                            .setUrl("latitude")
+                            .setValue(new DecimalType(rec.get("LAT")))
+                            .addExtension()
+                            .setUrl("longitude")
+                            .setValue(new DecimalType(rec.get("LON")))
+                    );
 
             HumanName name = new HumanName();
             name.addGiven(rec.get("FIRST"));
@@ -69,59 +69,59 @@ public class PatientsLoader extends BaseLoader {
                 patient.setDeceased(new BooleanType(false));
 
             patient.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("ANON")
-                        .setDisplay("Anonymous ID")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("ANON")
+                                    .setDisplay("Anonymous ID")
+                            )
                     )
-                )
-                .setSystem("urn:ietf:rfc:3986")
-                .setValue(rec.get("Id"));
+                    .setSystem("urn:ietf:rfc:3986")
+                    .setValue(rec.get("Id"));
 
             patient.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("SS")
-                        .setDisplay("Social Security Number")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("SS")
+                                    .setDisplay("Social Security Number")
+                            )
                     )
-                )
-                .setSystem("http://hl7.org/fhir/sid/us-ssn")
-                .setValue(rec.get("SSN"));
+                    .setSystem("http://hl7.org/fhir/sid/us-ssn")
+                    .setValue(rec.get("SSN"));
 
             patient.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("PPN")
-                        .setDisplay("Passport Number")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("PPN")
+                                    .setDisplay("Passport Number")
+                            )
                     )
-                )
-                .setSystem("http://standardhealthrecord.org/fhir/StructureDefinition/passportNumber")
-                .setValue(rec.get("PASSPORT"));
+                    .setSystem("http://standardhealthrecord.org/fhir/StructureDefinition/passportNumber")
+                    .setValue(rec.get("PASSPORT"));
 
             patient.addIdentifier()
-                .setType(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
-                        .setCode("DL")
-                        .setDisplay("Driver's License Number")
+                    .setType(new CodeableConcept()
+                            .addCoding(new Coding()
+                                    .setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
+                                    .setCode("DL")
+                                    .setDisplay("Driver's License Number")
+                            )
                     )
-                )
-                .setSystem("urn:oid:2.16.840.1.113883.4.3.25")
-                .setValue(rec.get("DRIVERS"));
+                    .setSystem("urn:oid:2.16.840.1.113883.4.3.25")
+                    .setValue(rec.get("DRIVERS"));
 
             patient.setGender(
-                rec.get("GENDER").equals("M") ? AdministrativeGender.MALE : AdministrativeGender.FEMALE
+                    rec.get("GENDER").equals("M") ? AdministrativeGender.MALE : AdministrativeGender.FEMALE
             );
 
             if (datasetService.hasProp(rec, "MARITAL"))
                 patient.setMaritalStatus(new CodeableConcept()
-                    .addCoding(new Coding()
-                        .setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
-                        .setCode(rec.get("MARITAL"))
-                    )
+                        .addCoding(new Coding()
+                                .setSystem("http://terminology.hl7.org/CodeSystem/v3-MaritalStatus")
+                                .setCode(rec.get("MARITAL"))
+                        )
                 );
 
             count++;
@@ -131,13 +131,12 @@ public class PatientsLoader extends BaseLoader {
                 buffer.forEach(bb::addTransactionUpdateEntry);
                 FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
 
-                //if (count % 1000 == 0)
-                 //   datasetService.logInfo("Loaded %d patients", count);
+                if (count % 1000 == 0)
+                    datasetService.logInfo("Loaded %d patients", count);
 
                 buffer.clear();
             }
         }
-
-     //   datasetService.logInfo("Loaded ALL patients");
+        datasetService.logInfo("Loaded ALL patients");
     }
 }
