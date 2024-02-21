@@ -1,7 +1,7 @@
 package unisa.diem;
 
 import lombok.SneakyThrows;
-import unisa.diem.parser.DatasetUtility;
+import unisa.diem.parser.DatasetService;
 
 /*
     * Use the load Dataset function to load the dataset
@@ -9,7 +9,7 @@ import unisa.diem.parser.DatasetUtility;
 public class Main {
     @SneakyThrows
     public static void main(String[] args) {
-        DatasetUtility datasetUtility = new DatasetUtility();
+        DatasetService datasetUtility = new DatasetService();
         datasetUtility.loadDataset();
     }
 }

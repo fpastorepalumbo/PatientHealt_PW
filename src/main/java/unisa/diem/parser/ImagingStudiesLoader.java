@@ -2,56 +2,55 @@ package unisa.diem.parser;
 
 import ca.uhn.fhir.util.BundleBuilder;
 import com.pixelmed.dicom.TagFromName;
+import unisa.diem.dicom.DicomHandle;
+import unisa.diem.fhir.FhirWrapper;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.Reference;
-import unisa.diem.dicom.DicomHandle;
-import unisa.diem.fhir.FhirSingleton;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Parsing of imaging studies (e.g. X-rays, MRIs, etc.) data one at a time
- */
-public class ImagingStudiesParser extends BaseParser {
+public class ImagingStudiesLoader extends BaseLoader {
 
     private Map<String, String> patientIndex = new HashMap<>();
 
-
-    ImagingStudiesParser(DatasetUtility datasetUtility) {
-        super(datasetUtility, "imaging_studies");
+    ImagingStudiesLoader(DatasetService datasetService) {
+        super(datasetService, "imaging_studies");
         patientIndex = makeIndex();
     }
 
-    /**
-     * Creates a map of patient IDs to their first and last names
-     */
     private Map<String, String> makeIndex() {
         Map<String, String> index = new HashMap<>();
-        for (CSVRecord rec : datasetUtility.parse("patients"))
+        for (CSVRecord rec : datasetService.parse("patients"))
             index.put(rec.get("Id"), rec.get("FIRST") + "_" + rec.get("LAST"));
         return index;
     }
 
     @SneakyThrows
     @Override
-    public void parseData() {
+    public void load() {
+        int count = 0;
         List<ImagingStudy> buffer = new ArrayList<>();
+
         for (CSVRecord rec : records) {
             Reference pat = new Reference("Patient/" + rec.get("PATIENT"));
             Reference enc = new Reference("Encounter/" + rec.get("ENCOUNTER"));
+
             String filename = patientIndex.get(rec.get("PATIENT")) + "_" + rec.get("PATIENT");
-            DicomHandle dicom = datasetUtility.getDicomService().getDicomFile(filename);
+            DicomHandle dicom = datasetService.getDicomService().getDicomFile(filename);
+
             if (dicom == null)
                 continue;
+
             ImagingStudy is = new ImagingStudy();
             is.setId(rec.get("Id"));
+
             is.addIdentifier()
                 .setType(new CodeableConcept()
                     .addCoding(new Coding()
@@ -62,20 +61,23 @@ public class ImagingStudiesParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("Id"));
-            is.setStarted(datasetUtility.parseDate(rec.get("DATE")));
+
+            is.setStarted(datasetService.parseDate(rec.get("DATE")));
             is.setSubject(pat);
             is.setEncounter(enc);
+
             is.addModality(new Coding()
                 .setSystem("http://dicom.nema.org/resources/ontology/DCM")
                 .setCode(rec.get("MODALITY_CODE"))
                 .setDisplay(rec.get("MODALITY_DESCRIPTION"))
             );
+
             ImagingStudy.ImagingStudySeriesComponent series = is.addSeries();
             if (dicom.hasAttr(TagFromName.SeriesDate))
-                series.setStarted(datasetUtility.parseDate(dicom.getFirstStringValue(TagFromName.SeriesDate)));
-            series.setUid(dicom.getFirstStringValue(TagFromName.SeriesInstanceUID));
-            series.setNumber(dicom.getFirstIntValue(TagFromName.SeriesNumber));
-            series.setDescription(dicom.getFirstStringValue(TagFromName.SeriesDescription));
+                series.setStarted(datasetService.parseDate(dicom.getString(TagFromName.SeriesDate)));
+            series.setUid(dicom.getString(TagFromName.SeriesInstanceUID));
+            series.setNumber(dicom.getInt(TagFromName.SeriesNumber));
+            series.setDescription(dicom.getString(TagFromName.SeriesDescription));
             series.setBodySite(new Coding()
                 .setSystem("http://snomed.info/sct")
                 .setCode(rec.get("BODYSITE_CODE"))
@@ -83,11 +85,11 @@ public class ImagingStudiesParser extends BaseParser {
             );
             series.setLaterality(new Coding()
                     .setSystem("http://snomed.info/sct")
-                    .setCode(dicom.getFirstStringValue(TagFromName.Laterality))
+                    .setCode(dicom.getString(TagFromName.Laterality))
                 )
                 .setNumberOfInstances(
                     dicom.hasAttr(TagFromName.NumberOfSeriesRelatedInstances) ?
-                        dicom.getFirstIntValue(TagFromName.NumberOfSeriesRelatedInstances) : 1
+                        dicom.getInt(TagFromName.NumberOfSeriesRelatedInstances) : 1
                 )
                 .setModality(new Coding()
                     .setSystem("http://dicom.nema.org/resources/ontology/DCM")
@@ -100,39 +102,29 @@ public class ImagingStudiesParser extends BaseParser {
                     .setDisplay(rec.get("BODYSITE_DESCRIPTION"))
                 )
                 .addInstance()
-                .setUid(dicom.getFirstStringValue(TagFromName.SOPInstanceUID))
-                .setNumber(dicom.getFirstIntValue(TagFromName.InstanceNumber))
+                .setUid(dicom.getString(TagFromName.SOPInstanceUID))
+                .setNumber(dicom.getInt(TagFromName.InstanceNumber))
                 .setSopClass(new Coding()
                     .setSystem("http://dicom.nema.org/resources/ontology/DCM")
                     .setCode(rec.get("SOP_CODE"))
                     .setDisplay(rec.get("SOP_DESCRIPTION"))
                 );
+
+            count++;
             buffer.add(is);
 
-            /*
             if (count % 10 == 0 || count == records.size()) {
-                BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+                BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
-                FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-                if (count % 100 == 0)
-                    datasetUtility.logInfo("%d imaging studies parsed", count);
+                FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
+
+               // if (count % 100 == 0)
+               //     datasetService.logInfo("Loaded %d imaging studies", count);
+
                 buffer.clear();
             }
-            */
-        }
-        int count = 0;
-        while (count < 30000 && !buffer.isEmpty()){
-            int upperSize = Math.min(100, buffer.size());
-            List<ImagingStudy> first100 = buffer.subList(0, upperSize);
-            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
-            first100.forEach(bb::addTransactionCreateEntry);
-            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-            datasetUtility.logInfo("%d imaging studies parsed", upperSize);
-            buffer.removeAll(first100);
-            count += 100;
         }
 
-        buffer.clear();
-        datasetUtility.logInfo("Imaging studies parsed");
+        //datasetService.logInfo("Loaded ALL imaging studies");
     }
 }

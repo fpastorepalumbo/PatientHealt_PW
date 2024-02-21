@@ -1,7 +1,7 @@
 package unisa.diem.parser;
 
 import ca.uhn.fhir.util.BundleBuilder;
-import unisa.diem.fhir.FhirSingleton;
+import unisa.diem.fhir.FhirWrapper;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.*;
@@ -9,19 +9,16 @@ import org.hl7.fhir.r4.model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Parsing of payers (private organizations that provide health insurance) data one at a time
- */
-public class PayersParser extends BaseParser {
-
-    PayersParser(DatasetUtility datasetUtility) {
-        super(datasetUtility, "payers");
+public class PayersLoader extends BaseLoader {
+    PayersLoader(DatasetService datasetService) {
+        super(datasetService, "payers");
     }
 
     @Override
     @SneakyThrows
-    public void parseData() {
+    public void load() {
         List<Organization> buffer = new ArrayList<>();
+        int count = 0;
         for (CSVRecord rec : records) {
             Organization org = new Organization();
             org.setId(rec.get("Id"));
@@ -35,12 +32,15 @@ public class PayersParser extends BaseParser {
                 )
                 .setSystem("urn:ietf:rfc:3986")
                 .setValue(rec.get("Id"));
+
             org.setName(rec.get("NAME"));
+
             org.addAddress()
                 .setCity(rec.get("CITY"))
                 .setState(rec.get("STATE_HEADQUARTERED"))
                 .setPostalCode(rec.get("ZIP"));
-            if (datasetUtility.hasProp(rec, "LAT") && datasetUtility.hasProp(rec, "LON"))
+
+            if (datasetService.hasProp(rec, "LAT") && datasetService.hasProp(rec, "LON"))
                 org.addExtension()
                     .setUrl("http://hl7.org/fhir/StructureDefinition/geolocation")
                     .setValue(new Address()
@@ -51,35 +51,26 @@ public class PayersParser extends BaseParser {
                         .setUrl("longitude")
                         .setValue(new DecimalType(rec.get("LON")))
                     );
+
             org.addTelecom()
                 .setSystem(ContactPoint.ContactPointSystem.PHONE)
                 .setValue(rec.get("PHONE"));
+
+            count++;
             buffer.add(org);
 
-            /*
             if (count % 10 == 0 || count == records.size()) {
-                BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
+                BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
                 buffer.forEach(bb::addTransactionUpdateEntry);
-                FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-                if (count % 1000 == 0)
-                    datasetUtility.logInfo(("%d payers parsed").formatted(count));
+                FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
+
+            //    if (count % 1000 == 0)
+             //       datasetService.logInfo("Loaded %d payers".formatted(count));
+
                 buffer.clear();
             }
-             */
-        }
-        int count = 0;
-        while (count < 30000 && !buffer.isEmpty()) {
-            int upperSize = Math.min(100, buffer.size());
-            List<Organization> first100 = buffer.subList(0, upperSize);
-            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
-            first100.forEach(bb::addTransactionCreateEntry);
-            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-            datasetUtility.logInfo("%d payers parsed", upperSize);
-            buffer.removeAll(first100);
-            count += 100;
         }
 
-        buffer.clear();
-        datasetUtility.logInfo("Payers parsed");
+//        datasetService.logInfo("Loaded ALL payers");
     }
 }

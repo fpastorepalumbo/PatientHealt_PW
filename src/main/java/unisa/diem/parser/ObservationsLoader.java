@@ -1,37 +1,38 @@
 package unisa.diem.parser;
 
 import ca.uhn.fhir.util.BundleBuilder;
-import unisa.diem.fhir.FhirSingleton;
+import unisa.diem.fhir.FhirWrapper;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObservationsParser extends BaseParser {
+public class ObservationsLoader extends BaseLoader {
 
-    /**
-     * Parsing of observations (e.g. blood pressure, glucose, weight, height, sexual orientation, etc.) data one at a time
-     */
-    ObservationsParser(DatasetUtility datasetUtility) {
-        super(datasetUtility, "observations");
+    ObservationsLoader(DatasetService datasetService) {
+        super(datasetService, "observations");
     }
 
     @Override
-    public void parseData() {
+    public void load() {
         int count = 0;
         List<Observation> buffer = new ArrayList<>();
-        List<Observation> bufferECG = new ArrayList<>();
+
         for (CSVRecord record : records) {
+
             Reference pat = new Reference("Patient/" + record.get("PATIENT"));
             Reference enc = null;
-            if (datasetUtility.hasProp(record, "ENCOUNTER"))
+
+            if (datasetService.hasProp(record, "ENCOUNTER"))
                 enc = new Reference("Encounter/" + record.get("ENCOUNTER"));
+
             Observation obs = new Observation();
             obs.getEffectiveDateTimeType().setValueAsString(record.get("DATE"));
             obs.setSubject(pat);
             if (enc != null)
                 obs.setEncounter(enc);
+
             obs.setCode(new CodeableConcept()
                 .addCoding(new Coding()
                     .setSystem(record.get("CODE").equals("29303009")
@@ -41,6 +42,7 @@ public class ObservationsParser extends BaseParser {
                     .setDisplay(record.get("DESCRIPTION"))
                 )
             );
+
             String unitStr = record.get("UNITS");
             if (unitStr.equals("{nominal}")) {
                 obs.setValue(new StringType(record.get("VALUE")));
@@ -55,37 +57,22 @@ public class ObservationsParser extends BaseParser {
             } else {
                 obs.setValue(new StringType(record.get("VALUE")));
             }
+
             count++;
-            String value = record.get("VALUE");
-            if (value.length() > 10 && !value.contains(" "))
-                bufferECG.add(obs);
-            else
-                buffer.add(obs);
+            buffer.add(obs);
+
+            if (count % 100 == 0 || count == records.size()) {
+                BundleBuilder bb = new BundleBuilder(FhirWrapper.getContext());
+                buffer.forEach(bb::addTransactionCreateEntry);
+                FhirWrapper.getClient().transaction().withBundle(bb.getBundle()).execute();
+
+                //if (count % 1000 == 0)
+                //    datasetService.logInfo("Loaded %d observations", count);
+
+                buffer.clear();
+            }
         }
 
-        while (!bufferECG.isEmpty()) {
-            int upperECGSize = Math.min(100, bufferECG.size());
-            List<Observation> first100 = bufferECG.subList(0, upperECGSize);
-            BundleBuilder bbECG = new BundleBuilder(FhirSingleton.getContext());
-            first100.forEach(bbECG::addTransactionCreateEntry);
-            FhirSingleton.getClient().transaction().withBundle(bbECG.getBundle()).execute();
-            datasetUtility.logInfo("%d ECG observations parsed", upperECGSize);
-            bufferECG.removeAll(first100);
-        }
-
-        int c = 0;
-        while (c < 30000 && !buffer.isEmpty()){
-            int upperSize = Math.min(100, buffer.size());
-            List<Observation> first100 = buffer.subList(0, upperSize);
-            BundleBuilder bb = new BundleBuilder(FhirSingleton.getContext());
-            first100.forEach(bb::addTransactionCreateEntry);
-            FhirSingleton.getClient().transaction().withBundle(bb.getBundle()).execute();
-            datasetUtility.logInfo("%d observations parsed", upperSize);
-            buffer.removeAll(first100);
-            c += 100;
-        }
-
-        buffer.clear();
-        datasetUtility.logInfo("Observations parsed");
+       // datasetService.logInfo("Loaded ALL observations");
     }
 }
